@@ -1,0 +1,52 @@
+{
+  "mcpServers": {
+    "deep-wiki": {
+      "url": "https://mcp.deepwiki.com/mcp"
+    },
+    "kanban": {
+      "command": "docker",
+      "args": ["exec", "-i", "plane-mcp", "python", "-m", "plane_mcp", "stdio"]
+    }
+  },
+  "hooks": {
+    "BeforeTool": [
+      {
+        "matcher": ".*(run_shell_command|Bash|shell).*",
+        "hooks": [
+          {
+            "name": "prevent-curl-bypass",
+            "type": "command",
+            "command": "./.gemini/hooks/prevent-curl-bypass.sh",
+            "description": "Prevents the AI from bypassing the verification pipeline by closing Kanban tickets via CLI tools like curl or gh.",
+            "timeout": 5000
+          }
+        ]
+      },
+      {
+        "matcher": ".*mcp_kanban_.*_work_item.*",
+        "hooks": [
+          {
+            "name": "qa-gate",
+            "type": "command",
+            "command": "./.gemini/hooks/qa-gate.sh",
+            "description": "Prevents the AI Orchestrator from directly closing tickets via update_work_item to enforce the verification pipeline.",
+            "timeout": 180000
+          }
+        ]
+      }
+    ],
+    "AfterTool": [
+      {
+        "matcher": ".*mcp_kanban_.*_work_item.*",
+        "hooks": [
+          {
+            "name": "remind-comment",
+            "type": "command",
+            "command": "echo '{\"message\": \"REMINDER: If you just updated the ticket, do not forget to add a comment detailing your changes using mcp_kanban_create_work_item_comment.\"}'",
+            "description": "Reminds the AI to add a comment after updating a ticket."
+          }
+        ]
+      }
+    ]
+  }
+}

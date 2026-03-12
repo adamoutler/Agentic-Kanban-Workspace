@@ -1,0 +1,6 @@
+plane/
+template/
+.gemini/.env
+.gemini/settings.json
+.gemini/GEMINI.md
+gemini-agency-agents/

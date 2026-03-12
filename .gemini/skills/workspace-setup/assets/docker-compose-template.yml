@@ -1,0 +1,123 @@
+services:
+  plane-db:
+    image: postgres:15-alpine
+    container_name: plane-db
+    restart: always
+    environment:
+      POSTGRES_USER: plane
+      POSTGRES_PASSWORD: ${PGPASSWORD}
+      POSTGRES_DB: plane
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - /etc/localtime:/etc/localtime:ro
+
+  plane-redis:
+    image: redis:7-alpine
+    container_name: plane-redis
+    restart: always
+    volumes:
+      - redisdata:/data
+      - /etc/localtime:/etc/localtime:ro
+
+  plane-mq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: plane-mq
+    restart: always
+    volumes:
+      - rabbitmqdata:/var/lib/rabbitmq
+      - /etc/localtime:/etc/localtime:ro
+
+  plane-minio:
+    image: minio/minio
+    container_name: plane-minio
+    restart: always
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: ${AWS_SECRET_ACCESS_KEY}
+    volumes:
+      - miniodata:/data
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+
+  plane-minio-setup:
+    image: minio/mc
+    container_name: plane-minio-setup
+    depends_on:
+      - plane-minio
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set myminio http://plane-minio:9000 minioadmin ${AWS_SECRET_ACCESS_KEY};
+      /usr/bin/mc mb myminio/uploads || true;
+      /usr/bin/mc anonymous set public myminio/uploads;
+      exit 0;
+      "
+
+  plane-mcp:
+    build: https://github.com/makeplane/plane-mcp-server.git#canary
+    container_name: plane-mcp
+    restart: always
+    environment:
+      - PLANE_BASE_URL=${PROTOCOL:-http}://${DOMAIN_NAME}
+      - REDIS_HOST=plane-redis
+      - REDIS_PORT=6379
+      - PLANE_OAUTH_PROVIDER_CLIENT_ID=dummy
+      - PLANE_OAUTH_PROVIDER_CLIENT_SECRET=dummy
+      - PLANE_OAUTH_PROVIDER_BASE_URL=https://${DOMAIN_NAME}/mcp/http
+      - PLANE_INTERNAL_BASE_URL=http://plane-aio:80
+      - PLANE_API_KEY=${PLANE_API_KEY}
+      - PLANE_WORKSPACE_SLUG=${WORKSPACE_SLUG}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      - plane-redis
+      - plane-aio
+
+  plane-aio:
+    image: makeplane/plane-aio-community:stable
+    container_name: plane-aio
+    restart: always
+    ports:
+      - "8085:80"
+    environment:
+      - DOMAIN_NAME=${DOMAIN_NAME}
+      - WEB_URL=${WEB_URL}
+      - APP_BASE_URL=${APP_BASE_URL}
+      - ADMIN_BASE_URL=${ADMIN_BASE_URL}
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
+      - APP_PROTOCOL=${PROTOCOL:-http}
+      - DATABASE_URL=postgresql://plane:${PGPASSWORD}@plane-db:5432/plane
+      - REDIS_URL=redis://plane-redis:6379/0
+      - AMQP_URL=amqp://guest:guest@plane-mq:5672/
+      - AWS_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=minioadmin
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_S3_BUCKET_NAME=uploads
+      - AWS_S3_ENDPOINT_URL=${WEB_URL}
+      - USE_MINIO=1
+      - MINIO_ENDPOINT_SSL=${MINIO_ENDPOINT_SSL:-0}
+      - SECRET_KEY=${SECRET_KEY}
+      - ADMIN_BASE_PATH=/god-mode/
+    volumes:
+      - planedata:/app/data
+      - planelogs:/app/logs
+      - ./Caddyfile.fixed:/app/proxy/Caddyfile
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      - plane-db
+      - plane-redis
+      - plane-mq
+      - plane-minio
+      - plane-minio-setup
+
+volumes:
+  pgdata:
+  redisdata:
+  rabbitmqdata:
+  miniodata:
+  planedata:
+  planelogs:
