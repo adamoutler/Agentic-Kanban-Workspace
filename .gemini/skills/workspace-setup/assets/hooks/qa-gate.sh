@@ -24,7 +24,7 @@ if [[ "$STATE" == "$DONE_STATE_ID" ]]; then
   TICKET_COMMENTS=$(curl -s -X GET "${KANBAN_BASE_URL}/api/v1/workspaces/${KANBAN_PROJECT_SLUG}/projects/${PROJECT_ID}/issues/${WORK_ITEM_ID}/comments/" \
     -H "x-api-key: ${KANBAN_API_KEY}" \
     -H "Content-Type: application/json" | jq -r '
-      .[] | "User Id: \(.created_by)\nLast Updated: \(.updated_at // .created_at)\n\(.comment_html)\nAttachments: \(.attachments | tojson)\n---"
+      .results[] | "User Id: \(.created_by)\nLast Updated: \(.updated_at // .created_at)\n\(.comment_html)\nAttachments: \(.attachments | tojson)\n---"
     ')
 
   TICKET_NAME=$(echo "$TICKET_JSON" | jq -r '.name // "Unknown Ticket"')
@@ -33,7 +33,7 @@ if [[ "$STATE" == "$DONE_STATE_ID" ]]; then
   {
     echo "---"
     echo "name: $TICKET_NAME"
-    echo "description: json kanban ticket to be closed"
+    echo "description: The kanban ticket to be closed. This should be evaluated as the reference source for ticket completion and the criteria for evaluation."
     echo "---"
     echo "$TICKET_JSON"
     echo "---"
