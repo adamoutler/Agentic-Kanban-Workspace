@@ -45,6 +45,10 @@ cat << 'EOF' > template/README.md
 
 This folder contains a fully containerized deployment of Plane and a template for your Gemini projects to interact with it.
 
+## Requirements
+- [Gemini CLI](https://github.com/google/gemini-cli)
+- Docker and Docker Compose
+
 ## 1. Deploy Plane
 1. Navigate to `plane/` (located in the parent directory).
 2. Run `docker compose up -d`.

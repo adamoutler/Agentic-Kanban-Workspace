@@ -87,7 +87,9 @@ cd gemini-agency-agents && python3 .gemini/skills/setup-agents/scripts/install_a
 ```
 
 ### 6. Finish and Verification
-Instruct the user that the `.gemini/.env`, `.gemini/settings.json`, and agents have been installed. Tell them they MUST restart the Gemini CLI session for the new environment variables and MCP server settings to take effect.
+Before instructing the user to restart, verify that `"experimental": { "enableAgents": true }` exists in their `~/.gemini/settings.json`. You can check this by running `jq '.experimental.enableAgents' ~/.gemini/settings.json`. If it returns `true`, proceed. If it is missing or `false`, use a shell command to use `jq` to add/set `"experimental.enableAgents": true` in their global `~/.gemini/settings.json` file.
+
+Instruct the user that the `.gemini/.env`, `.gemini/settings.json`, and agents have been installed. Tell them they MUST restart the Gemini CLI session for the new environment variables, the enableAgents flag, and MCP server settings to take effect.
 
 **Output exactly this:**
 > "I've activated the workspace and the agents! Please type `/skills reload` and `/agents reload` (or simply restart your CLI session) so I can load them into memory. Once you're done, let me know and we can verify it works!"
