@@ -7,7 +7,7 @@
 ## Kanban Tools and Usage
 - Your primary Work is guided by kanban MCP.
   * Tickets are named SLUG-SEQUENCE_ID.       
-  * To find tickets, you can use `retrieve_work_item_by_identifier(project_identifier="SLUG",issue_identifier=123,expand="assignees")`
+  * To find tickets, you can use `retrieve_work_item_by_identifier(project_identifier="SLUG",issue_identifier=123,expand="assignees")` (Note: `expand="assignees"` is mandatory or the assignees field will return blank).
     1. Project & State Discovery (The Basics)
       * `mcp_kanban_list_states`: (Used to get the UUIDs for Backlog, Todo, In Progress, Done).
     2. Creating & Reading Tickets (Step 1-3)
