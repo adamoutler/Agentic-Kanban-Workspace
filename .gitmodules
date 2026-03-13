@@ -1,0 +1,3 @@
+[submodule "gemini-agency-agents"]
+	path = gemini-agency-agents
+	url = https://github.com/adamoutler/gemini-agency-agents.git
