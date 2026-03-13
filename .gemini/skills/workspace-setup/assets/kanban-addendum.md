@@ -25,6 +25,8 @@
         * Add assignees (assigning to AI agents or users).
         * Update the description or priority.
       * `mcp_kanban_create_work_item_comment`: (IMPORTANT: always add comments to tickets after closing).
+        * **Providing Proof via Comments:** To pass the QA gate, you must guide the checking agent to your evidence. When commenting on the ticket to signal completion, include a direct instruction for the agent.
+        * *Example Comment:* `Ticket's done. read_file(file:docs/qa/test_results/evidence.txt)` or `list_files(dir_path:docs/qa-images/GEMWEBUI-123)`.
   5. Epic/Milestone Management (Optional, but good for larger features)
    * `mcp_kanban_list_epics`
    * `mcp_kanban_create_epic`

@@ -20,6 +20,13 @@ if [[ "$STATE" == "$DONE_STATE_ID" ]]; then
     -H "x-api-key: ${KANBAN_API_KEY}" \
     -H "Content-Type: application/json")
 
+  # Retrieve the ticket comments and format them to reduce context size
+  TICKET_COMMENTS=$(curl -s -X GET "${KANBAN_BASE_URL}/api/v1/workspaces/${KANBAN_PROJECT_SLUG}/projects/${PROJECT_ID}/issues/${WORK_ITEM_ID}/comments/" \
+    -H "x-api-key: ${KANBAN_API_KEY}" \
+    -H "Content-Type: application/json" | jq -r '
+      .[] | "User Id: \(.created_by)\nLast Updated: \(.updated_at // .created_at)\n\(.comment_html)\nAttachments: \(.attachments | tojson)\n---"
+    ')
+
   TICKET_NAME=$(echo "$TICKET_JSON" | jq -r '.name // "Unknown Ticket"')
   TICKET_FILE="/tmp/ticket_${WORK_ITEM_ID}.md"
 
@@ -29,6 +36,8 @@ if [[ "$STATE" == "$DONE_STATE_ID" ]]; then
     echo "description: json kanban ticket to be closed"
     echo "---"
     echo "$TICKET_JSON"
+    echo "---"
+    echo "${TICKET_COMMENTS}"
   } > "$TICKET_FILE"
 
   RESULT=$(cat "$TICKET_FILE" | gemini -p "@reality-checker Please verify if work item $WORK_ITEM_ID is completed. You don't get the work items from the filesystem. Use the list_files and read_file tool to find proof. You may request any additional information you need in a specific location. Be descriptive. Otherwise, respond with NEEDS WORK." 2>&1)
