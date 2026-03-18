@@ -33,7 +33,7 @@ if [[ "$STATE" == "$DONE_STATE_ID" ]]; then
   {
     echo "---"
     echo "name: $TICKET_NAME"
-    echo "description: The kanban ticket to be closed. This should be evaluated as the reference source for ticket completion and the criteria for evaluation."
+    echo "description: The kanban ticket to be closed. This should be evaluated as the reference source for ticket completion and the criteria for evaluation. If it is blank, this is an automatic failure."
     echo "---"
     echo "$TICKET_JSON"
     echo "---"
