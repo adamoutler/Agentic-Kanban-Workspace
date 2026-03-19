@@ -15,11 +15,6 @@ Once the setup is complete, you will have a ready-to-use template that can be co
 * **Drop-in Project Template:** A ready-to-use workspace template that instantly injects this entire ecosystem into any existing repository.
 
 
-## Customization
-Many people don't know that you can use relative references in the GEMINI.md file.  The main GEMINI.md contains the agents-orchestration persona, instructions on how to operate the kanban board, and a blank .gemini/prompts/project-specific.md file which you can customize. You can feel free to add to the templates and modify them for your style.
-
-
-
 ## Requirements
 Before starting, ensure your system has the following installed:
 - [Docker](https://docs.docker.com/get-docker/) and Docker Compose
